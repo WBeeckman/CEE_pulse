@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CEE Pulse — Regional Economic News</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B1220;
+    --bg-raised: #101A2E;
+    --line: #223054;
+    --text: #EDEEF0;
+    --muted: #8B93A7;
+    --gold: #E8A33D;
+    --up: #D65C4F;
+    --down: #4FAE8B;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --display: 'Fraunces', serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.5;
+    padding-bottom: 60px;
+  }
+  a{color: inherit; text-decoration: none;}
+
+  header.top{
+    padding: 28px 20px 20px;
+    max-width: 1300px;
+    margin: 0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand{
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+  }
+  .brand span{color:var(--gold);}
+  .updated{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .ticker-wrap{
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 18px 20px 0;
+  }
+  .ticker-label{
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .ticker{
+    display:flex;
+    gap: 2px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .chip{
+    flex: 1 1 140px;
+    min-width: 130px;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    padding: 10px 14px;
+  }
+  .chip .country{
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .chip .rate{
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .chip .dir{
+    font-family: var(--mono);
+    font-size: 10px;
+    margin-top: 2px;
+  }
+  .dir.up{color: var(--up);}
+  .dir.down{color: var(--down);}
+  .dir.hold{color: var(--muted);}
+
+  main{
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 30px 20px 0;
+  }
+
+  .section-title{
+    font-family: var(--display);
+    font-size: 21px;
+    font-weight: 500;
+    margin-bottom: 18px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .jump{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 30px;
+  }
+  .jump a{
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gold);
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    background: var(--bg-raised);
+  }
+  .jump a:hover{border-color: var(--gold);}
+
+  .filter-label{
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .filter-bar{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 30px;
+  }
+  .filter-btn{
+    font-family: var(--mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid var(--line);
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .filter-btn:hover{border-color: var(--gold); color: var(--gold);}
+  .filter-btn.active{
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--bg);
+    font-weight: 600;
+  }
+  .story.hidden{display:none;}
+  .card-empty-note{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    display:none;
+  }
+  .news-card.all-hidden .card-empty-note{display:block;}
+
+  .news-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 18px;
+    margin-bottom: 40px;
+  }
+  .news-card{
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    padding: 20px 22px;
+    scroll-margin-top: 20px;
+  }
+  .news-card h3{
+    font-family: var(--display);
+    font-size: 19px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    display:flex;
+    justify-content: space-between;
+    align-items:baseline;
+  }
+  .news-card h3 .ccy{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 400;
+  }
+  .quickstats{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .quickstats b{color: var(--text); font-weight: 500;}
+
+  .story{
+    margin-bottom: 13px;
+    padding-bottom: 13px;
+    border-bottom: 1px solid rgba(34,48,84,0.5);
+  }
+  .story:last-child{margin-bottom:0; border-bottom:none; padding-bottom:0;}
+  .story .headline{
+    font-size: 13.5px;
+    margin-bottom: 4px;
+  }
+  .story .meta{
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .story .meta a{
+    color: var(--gold);
+    border-bottom: 1px solid rgba(232,163,61,0.35);
+  }
+  .story .meta a:hover{border-bottom-color: var(--gold);}
+
+  .themes{
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    padding: 24px;
+    margin-bottom: 40px;
+  }
+  .themes .story{margin-bottom: 16px; border-bottom: 1px solid rgba(34,48,84,0.5); padding-bottom:16px;}
+  .themes .story:last-child{border-bottom:none; padding-bottom:0; margin-bottom:0;}
+  .themes .headline{font-size: 14px;}
+  .themes .headline strong{color: var(--gold); font-weight: 500;}
+
+  footer{
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 20px 20px 0;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  footer p{margin-bottom: 6px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">CEE <span>Pulse</span></div>
+  <div class="updated">Last updated — 07 Jul 2026 · sorted newest first</div>
+</header>
+
+<div class="ticker-wrap">
+  <div class="ticker-label">Policy rates — quick reference</div>
+  <div class="ticker">
+    <div class="chip">
+      <div class="country">Czechia · CNB</div>
+      <div class="rate">3.75%</div>
+      <div class="dir up">▲ hiked 18 Jun</div>
+    </div>
+    <div class="chip">
+      <div class="country">Hungary · MNB</div>
+      <div class="rate">6.00%</div>
+      <div class="dir down">▼ cut 23 Jun</div>
+    </div>
+    <div class="chip">
+      <div class="country">Poland · NBP</div>
+      <div class="rate">3.75%</div>
+      <div class="dir hold">■ held, mtg this wk</div>
+    </div>
+    <div class="chip">
+      <div class="country">Romania · BNR</div>
+      <div class="rate">6.50%</div>
+      <div class="dir hold">■ held since Aug 2024</div>
+    </div>
+    <div class="chip">
+      <div class="country">Bulgaria</div>
+      <div class="rate">Euro area</div>
+      <div class="dir hold">joined 1 Jan 2026</div>
+    </div>
+    <div class="chip">
+      <div class="country">Slovakia</div>
+      <div class="rate">Euro area</div>
+      <div class="dir hold">ECB rate applies</div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <div class="section-title">Political decisions with economic impact — last 30 days</div>
+  <div class="news-grid" style="margin-bottom:40px;">
+
+    <div class="news-card">
+      <h3>🇨🇿 Czechia</h3>
+      <div class="story" data-cat="political"><div class="headline">PM Babiš announced a CZK 36bn increase to the defense budget, pushing spending to 2% of GDP for the first time under this government — timed to the NATO summit in Ankara. Czechia will not block the EU's proposed €70bn Ukraine aid package but will not contribute financially, saying the funds are needed to hit the NATO target.</div><div class="meta">Expats.cz (ČTK) — 7 Jul 2026 · <a href="https://www.expats.cz/czech-news/article/czech-news-in-brief-for-july-7-2026-tuesday-top-morning-headlines" target="_blank" rel="noopener">Read source</a></div></div>
+    </div>
+
+    <div class="news-card">
+      <h3>🇵🇱 Poland</h3>
+      <div class="story" data-cat="political"><div class="headline">President Nawrocki issued a record 37th veto — more than any Polish president in history — continuing to block government legislation, including the law needed to access Poland's €44bn share of the EU's SAFE defense-loan program. Tusk's government is proceeding with defense spending anyway via workarounds, but more flexible uses of the funds (police, border guard modernization) remain blocked.</div><div class="meta">Notes from Poland — 12 Jun 2026 · <a href="https://notesfrompoland.com/2026/06/12/nawrocki-issues-record-37th-veto-more-than-any-other-president-in-polish-history/" target="_blank" rel="noopener">Read source</a></div></div>
+    </div>
+
+    <div class="news-card">
+      <h3>🇭🇺 Hungary</h3>
+      <div class="story" data-cat="political"><div class="headline">The EU moved to release over €16bn in previously frozen funds after PM Péter Magyar's government delivered on anti-corruption and rule-of-law pledges — a major reversal after years of Hungarian funds being withheld under the previous administration. The forint has rallied on the news.</div><div class="meta">FocusEconomics — early Jun 2026 · <a href="https://www.focus-economics.com/countries/hungary/" target="_blank" rel="noopener">Read source</a></div></div>
+    </div>
+
+    <div class="news-card">
+      <h3>🇷🇴 Romania</h3>
+      <div class="story" data-cat="political"><div class="headline">Romania remains without a fully empowered government: interim PM Ilie Bolojan — whose coalition collapsed in a no-confidence vote in May — is expected to stay on with limited powers until at least August as coalition talks stall. President Nicușor Dan has ruled out early elections for now, but the political vacuum is delaying the fiscal reforms needed to unlock ~€10bn in EU recovery funds before an August deadline.</div><div class="meta">Romania Insider — 6 Jul 2026 · <a href="https://www.romania-insider.com/acting-pm-ilie-bolojan-remain-office-july-2026" target="_blank" rel="noopener">Read source</a></div></div>
+    </div>
+
+    <div class="news-card">
+      <h3>🇧🇬 Bulgaria</h3>
+      <div class="story" data-cat="political"><div class="headline">Rumen Radev's Progressive Bulgaria, which won an outright majority in April — ending a five-year political crisis and eight elections — is now moving to raise the debt ceiling for EU-funded projects by €3.8bn, after repeated snap elections delayed adoption of the 2026 budget and slowed infrastructure and energy-transition spending.</div><div class="meta">PolitPro — late Jun 2026 · <a href="https://politpro.eu/en/bulgaria" target="_blank" rel="noopener">Read source</a></div></div>
+    </div>
+
+    <div class="news-card">
+      <h3>🇸🇰 Slovakia</h3>
+      <div class="story" data-cat="political"><div class="headline">PM Fico's government continues its fiscal consolidation drive — tax and social-contribution increases took effect at the start of 2026 — while maintaining a foreign-policy posture (opposing EU sanctions on Russia, resisting using frozen Russian assets for Ukraine) that keeps Slovakia at odds with most of the bloc. Slovakia resumed receiving Russian crude via the Druzhba pipeline on 23 April after a months-long dispute.</div><div class="meta">Balkan Insight / Wikipedia — ongoing through Jun 2026 · <a href="https://en.wikipedia.org/wiki/Robert_Fico" target="_blank" rel="noopener">Read source</a></div></div>
+    </div>
+
+  </div>
+
+  <div class="section-title">Latest news by country <span style="font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 400;">— newest first</span></div>
+  <div class="jump">
+    <a href="#czechia">Czechia</a>
+    <a href="#hungary">Hungary</a>
+    <a href="#poland">Poland</a>
+    <a href="#romania">Romania</a>
+    <a href="#bulgaria">Bulgaria</a>
+    <a href="#slovakia">Slovakia</a>
+  </div>
+
+  <div class="filter-label">Filter by economic variable</div>
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="rates">Rates</button>
+    <button class="filter-btn" data-filter="inflation">Inflation</button>
+    <button class="filter-btn" data-filter="growth">Growth &amp; labour</button>
+    <button class="filter-btn" data-filter="fiscal">Fiscal</button>
+    <button class="filter-btn" data-filter="fx">FX &amp; investment</button>
+    <button class="filter-btn" data-filter="political">Political</button>
+  </div>
+
+  <div class="news-grid">
+
+    <div class="news-card" id="czechia">
+      <h3>Czechia <span class="ccy">CZK</span></h3>
+      <div class="quickstats">Rate <b>3.75%</b> · Inflation (Jun, est.) <b>1.8%</b> y/y · H1 budget deficit <b>CZK 183.6bn</b></div>
+
+      <div class="story" data-cat="rates"><div class="headline">First-half state budget deficit hit CZK 183.6bn, up CZK 31.2bn from last year, widening the fiscal gap the CNB is watching.</div><div class="meta">Erste Group / FXStreet — 6 Jul 2026 · <a href="https://www.fxstreet.com/analysis/cee-stability-of-rates-in-poland-romania-and-serbia-202607060606" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">June inflation is expected to slow to about 1.8% y/y on softer fuel prices.</div><div class="meta">FXStreet (Erste Group) — 6 Jul 2026 · <a href="https://www.fxstreet.com/analysis/cee-stability-of-rates-in-poland-romania-and-serbia-202607060606" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">CNB raised its two-week repo rate 25bp to 3.75% on 18 June — the first hike since 2022 — citing 8% Q1 wage growth and a widening deficit.</div><div class="meta">Česká národní banka (ČNB) — 18 Jun 2026 · <a href="https://tradingeconomics.com/czech-republic/interest-rate" target="_blank" rel="noopener">English source</a> · <a href="https://www.cnb.cz/cs/cnb-news/tiskove-zpravy/CNB-zvysuje-urokove-sazby-00020/" target="_blank" rel="noopener">Original (CS)</a></div></div>
+
+      <div class="story" data-cat="political"><div class="headline">Six of the CNB's seven board members voted for the hike; Governor Michl said the move aims to cool a credit boom and encourage saving, while PM Babiš criticized the decision's impact on lending.</div><div class="meta">Hospodářské noviny (HN.cz) — 18 Jun 2026 · <a href="https://archiv.hn.cz/c1-67893930-babisovi-navzdory-cnb-zvysila-zakladni-urokovou-sazbu-podle-premiera-tim-poskodi-ekonomiku" target="_blank" rel="noopener">Original (CS)</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">CNB board member Jan Procházka called the hike-or-hold decision "50-50" the week before the bank's June meeting.</div><div class="meta">Brno Daily — 17 Jun 2026 · <a href="https://brnodaily.com/2026/06/17/news/politics/czech-national-bank-faces-split-decision-ahead-of-interest-rate-meeting/" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">Q1 2026 average wages rose 6.4% y/y — the fastest pace since Q2 2021 — with the average gross monthly wage reaching CZK 50,282.</div><div class="meta">Trading Economics — 4 Jun 2026 · <a href="https://tradingeconomics.com/czech-republic/wage-growth" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">January 2026's goods trade surplus reached CZK 19.3bn, helped by a stronger koruna easing import costs.</div><div class="meta">Czech Embassy (Addis Ababa) — 12 Apr 2026 · <a href="https://mzv.gov.cz/addisababa/en/business_information/czechia_macroeconomic_developments_and.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">IMF's Article IV mission found 2025 growth at ~2.5%, core inflation sticky at 2.8%, and recommended monetary policy stay on hold barring major wage or fiscal shifts.</div><div class="meta">IMF — 3 Feb 2026 · <a href="https://www.imf.org/en/news/articles/2026/02/03/pr26031-czech-republic-2026-article-iv-concluding-statement" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">Real wages are projected to grow 2.7% in 2026 — the second-fastest rate in the EU, behind only Hungary.</div><div class="meta">Expats.cz — 27 Dec 2025 · <a href="https://www.expats.cz/czech-news/article/real-wages-in-czechia-to-rise-almost-the-fastest-in-all-eu-next-year" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">European Commission forecasts GDP growth slowing to 1.8% in 2026 from 2.6% in 2025, with the deficit rising toward 2.9% by 2027.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-member-states/country-pages/czechia/economic-forecast-czechia_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fx"><div class="headline">Czechia continues to act as CEE's real-estate investment "liquidity anchor," per Knight Frank data cited by Eurobuild.</div><div class="meta">Eurobuild CEE (Knight Frank) · <a href="https://eurobuildcee.com/en/news/36183-cee-ready-for-the-rebound" target="_blank" rel="noopener">Read source</a></div></div>
+
+    </div>
+
+    <div class="news-card" id="hungary">
+      <h3>Hungary <span class="ccy">HUF</span></h3>
+      <div class="quickstats">Rate <b>6.00%</b> · Inflation (May) <b>1.8%</b> y/y · 2026 deficit guidance <b>&gt;7% GDP</b></div>
+
+      <div class="story" data-cat="political"><div class="headline">PM Péter Magyar said the 2026 budget deficit will most likely land above 7% of GDP, even accounting for newly unlocked EU funds.</div><div class="meta">Erste Group / FXStreet — 6 Jul 2026 · <a href="https://www.fxstreet.com/analysis/cee-stability-of-rates-in-poland-romania-and-serbia-202607060606" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">MNB cut its base rate 25bp to 6% on 23 June and signalled room for further cuts through the summer, citing a stronger forint.</div><div class="meta">Magyar Nemzeti Bank (MNB) — 23 Jun 2026 · <a href="https://www.mnb.hu/en/monetary-policy/the-monetary-council/press-releases/2026/press-release-on-the-monetary-council-meeting-of-23-june-2026" target="_blank" rel="noopener">English source</a> · <a href="https://www.mnb.hu/monetaris-politika/a-monetaris-tanacs/kozlemenyek/2026/kozlemeny-a-monetaris-tanacs-2026-junius-23-i-uleserol" target="_blank" rel="noopener">Original (HU)</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">The forint has strengthened 2.5% against the euro and the 10-year yield has fallen 30bp over the past month, which Portfolio's markets desk says gave the MNB more confidence to keep easing.</div><div class="meta">Portfolio.hu — 23 Jun 2026 · <a href="https://www.portfolio.hu/gazdasag/20260623/itt-az-mnb-kamatdontese-845114" target="_blank" rel="noopener">Original (HU)</a></div></div>
+
+      <div class="story" data-cat="political"><div class="headline">The MNB nearly halved its 2026 inflation forecast in the June Inflation Report, surprising analysts; the government's fuel-price cap is set to be phased out as market prices have already fallen below the protected level.</div><div class="meta">Világgazdaság (vg.hu) — 23 Jun 2026 · <a href="https://www.vg.hu/vilaggazdasag-magyar-gazdasag/2026/06/mnb-inflacios" target="_blank" rel="noopener">Original (HU)</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">May inflation eased to 1.8% y/y from 2.1% in April; core inflation slowed to 2.0%.</div><div class="meta">Trading Economics — 9 Jun 2026 · <a href="https://tradingeconomics.com/hungary/inflation-cpi" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fx"><div class="headline">The forint has gained roughly 8% against the euro this year, near a four-year high.</div><div class="meta">EU Convergence Report — 2 wks ago · <a href="https://economy-finance.ec.europa.eu/document/download/a7e5a4e3-d606-4fcb-b40c-b9c53e84b8b8_en?filename=ip343_en.pdf" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">Hungary still misses the EU's price-stability convergence criterion — average inflation to May 2026 stood at 3.3%, above the 2.7% reference value.</div><div class="meta">EU Convergence Report — 2 wks ago · <a href="https://economy-finance.ec.europa.eu/document/download/a7e5a4e3-d606-4fcb-b40c-b9c53e84b8b8_en?filename=ip343_en.pdf" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="political"><div class="headline">The EU is set to release over €16bn in frozen funds after Magyar pledged anti-corruption and rule-of-law reforms.</div><div class="meta">FocusEconomics — 3 Jun 2026 · <a href="https://www.focus-economics.com/countries/hungary/" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">Q1 2026 GDP grew 1.7% y/y — the fastest pace in nearly four years — driven by industry and services.</div><div class="meta">FocusEconomics — 3 Jun 2026 · <a href="https://www.focus-economics.com/countries/hungary/" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">Real wage growth is projected at 3.5% in 2026 — the highest rate in the EU.</div><div class="meta">Expats.cz — 27 Dec 2025 · <a href="https://www.expats.cz/czech-news/article/real-wages-in-czechia-to-rise-almost-the-fastest-in-all-eu-next-year" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">European Commission sees the 2026 deficit widening to 6.2% of GDP, driven by a phased-in 14th-month pension and new housing support.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-member-states/country-pages/hungary/economic-forecast-hungary_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">MNB lowered its 2026 inflation forecast to 3.2% from 3.8% projected in September, with a notably dovish tone from Governor Varga.</div><div class="meta">deVere Europe · <a href="https://www.devere-europe.com/news/Hungary-holds-rates-steady-downgrades-2026-inflation-outlook" target="_blank" rel="noopener">Read source</a></div></div>
+
+    </div>
+
+    <div class="news-card" id="poland">
+      <h3>Poland <span class="ccy">PLN</span></h3>
+      <div class="quickstats">Rate <b>3.75%</b> · Inflation (Jun) <b>2.5%</b> y/y · GDP 2026f <b>3.4–3.7%</b></div>
+
+      <div class="story" data-cat="rates"><div class="headline">June inflation eased to 2.5% y/y on softer food and fuel prices; the NBP holds its policy meeting this week and will publish new projections.</div><div class="meta">Erste Group / FXStreet — 6 Jul 2026 · <a href="https://www.fxstreet.com/analysis/cee-stability-of-rates-in-poland-romania-and-serbia-202607060606" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">NBP's July Inflation Report projects CPI easing to 2.9% in 2026 (from 3.7% this year) and GDP growth of 3.7%.</div><div class="meta">Polska Agencja Prasowa (PAP) · <a href="https://www.pap.pl/en/news/polands-inflation-drop-29-pct-2026-central-bank-forecasts" target="_blank" rel="noopener">English source</a> · <a href="https://www.pap.pl/aktualnosci/inflacja-w-polsce-nbp-podal-prognoze" target="_blank" rel="noopener">Original (PL)</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">The same NBP projection sees wage growth slowing to 6.4% in 2026 from 8.7% in 2025, as the effect of 2022–2023's high inflation fades out of pay-setting mechanisms.</div><div class="meta">Bankier.pl · <a href="https://www.bankier.pl/wiadomosc/Inflacja-w-dol-PKB-w-gore-Znamy-projekcje-NBP-na-2026-rok-9036522.html" target="_blank" rel="noopener">Original (PL)</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">Q1 2026 GDP grew 3.5% y/y, a stable expansion still led mainly by consumption.</div><div class="meta">Poland Insight · <a href="https://polandinsight.com/economy/" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">Manufacturing PMI rose to 49.4 in May — still below the 50 growth threshold, but the mildest deterioration in months.</div><div class="meta">Poland Insight · <a href="https://polandinsight.com/economy/" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">Unemployment held at 3.0% in March 2026 (Eurostat basis), among the lowest rates in the EU.</div><div class="meta">Trading Economics · <a href="https://tradingeconomics.com/poland/unemployment-rate-eurostat-data.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">The 2025 deficit widened to 7.3% of GDP on higher military, wage and social spending; 2026 is projected to narrow only to 6.5%.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-member-states/country-pages/poland/economic-forecast-poland_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">IMF's Article IV review flagged Poland's fiscal deficit as the EU's second-largest despite a closed output gap, recommending a 4-point-of-GDP consolidation path by 2030.</div><div class="meta">IMF — 24 Nov 2025 · <a href="https://www.imf.org/en/news/articles/2025/11/24/cs-poland-staff-concluding-statement-of-the-2025-article-iv-mission" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">Allianz Trade expects one final NBP rate cut to 3.75% in 2026, holding there through 2027.</div><div class="meta">Allianz Trade — 4 Feb 2026 · <a href="https://www.allianz-trade.com/en_global/economic-research/country-reports/Poland.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">New workplace rules take effect in 2026, including formal anti-mobbing protections, amid record reliance on foreign workers to fill labour shortages.</div><div class="meta">Kono — 15 Jan 2026 · <a href="https://kono.jobs/en/work-in-poland-2026/" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">EUR/PLN is forecast to trade in a 4.20–4.30 range, supported by RRF/SAFE EU fund inflows and Poland's regional growth outperformance.</div><div class="meta">ING Think · <a href="https://think.ing.com/articles/emea-2026-fx-outlook/" target="_blank" rel="noopener">Read source</a></div></div>
+
+    </div>
+
+    <div class="news-card" id="romania">
+      <h3>Romania <span class="ccy">RON</span></h3>
+      <div class="quickstats">Rate <b>6.50%</b> · Inflation (May) <b>10.9%</b> y/y · Budget deficit target <b>8.4% GDP</b></div>
+
+      <div class="story" data-cat="political"><div class="headline">Acting PM Bolojan announced Romania is drafting six laws seen as critical to unlocking EU funds, to go before parliament in a special July session.</div><div class="meta">Erste Group / FXStreet — 6 Jul 2026 · <a href="https://www.fxstreet.com/analysis/cee-stability-of-rates-in-poland-romania-and-serbia-202607060606" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">BNR has held its policy rate at 6.50% since August 2024 and is expected to keep it there at its next meeting on 8 July, alongside Poland and Serbia.</div><div class="meta">Banca Națională a României (BNR) — 15 May 2026 · <a href="https://www.fxstreet.com/analysis/cee-stability-of-rates-in-poland-romania-and-serbia-202607060606" target="_blank" rel="noopener">English source</a> · <a href="https://www.bnr.ro/25487-2026-05-15-hotarari-ale-ca-al-bnr-pe-probleme-de-politica-monetara" target="_blank" rel="noopener">Original (RO)</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">April inflation surged to 10.71% y/y, mainly on higher natural gas, fuel, and administered prices amid unfavorable base effects and rising oil quotations.</div><div class="meta">Digi24 — 15 May 2026 · <a href="https://www.digi24.ro/stiri/economie/bnr-decide-astazi-asupra-dobanzii-cheie-ce-inseamna-rata-de-politica-monetara-si-cum-ii-afecteaza-pe-romani-3771607" target="_blank" rel="noopener">Original (RO)</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">A BCR analyst pushed back the expected timing of the first BNR rate cut to Q2 2027, citing the higher inflation trajectory and recent depreciation pressure on the leu.</div><div class="meta">Ziare.com — 15 May 2026 · <a href="https://ziare.com/macroeconomie/sedinta-banca-nationala-romania-dobanda-politica-monetara-mentinere-65-2012883" target="_blank" rel="noopener">Original (RO)</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">European Commission projects the economy to broadly stagnate in 2026 (real GDP +0.1%) as consolidation and inflation weigh on consumption.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-member-states/country-pages/romania/economic-forecast-romania_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">HICP inflation is forecast to average 7% in 2026, up from 6.8% in 2025, due to Middle East-linked energy costs.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-member-states/country-pages/romania/economic-forecast-romania_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="political"><div class="headline">The general government deficit is projected to narrow from 7.9% of GDP in 2025 to 6.2% in 2026.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-member-states/country-pages/romania/economic-forecast-romania_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">National CPI data put May inflation at 10.9% y/y, among the highest readings in the EU.</div><div class="meta">countryeconomy.com · <a href="https://countryeconomy.com/countries/compare/romania/poland" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">The minimum wage rises 6.8% as of July 2026, alongside caps on civil-servant bonuses as part of ongoing fiscal consolidation.</div><div class="meta">OECD Economic Survey — Romania 2026 · <a href="https://www.oecd.org/en/publications/oecd-economic-surveys-romania-2026_4844067e-en/full-report/macroeconomic-developments-and-policy-challenges_79ae69d1.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">The bank-turnover levy was raised to 4% in July 2025 as part of the consolidation package, and stays in force through end-2026.</div><div class="meta">OECD Economic Survey — Romania 2026 · <a href="https://www.oecd.org/en/publications/oecd-economic-surveys-romania-2026_4844067e-en/full-report/macroeconomic-developments-and-policy-challenges_79ae69d1.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fx"><div class="headline">A renegotiated National Recovery and Resilience Plan with the European Commission aims to keep tight-deadline EU investment projects moving.</div><div class="meta">ING Think · <a href="https://think.ing.com/articles/emea-2026-fx-outlook/" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">Scope Ratings flags Romania as among the CEE sovereigns with the most elevated fiscal and governance risk in its 2026 Outlook.</div><div class="meta">Scope Ratings — CEE Outlook 2026 · <a href="https://www.scoperatings.com/ScopeRatingsApi/api/downloadstudy?id=e5fa43de-2b4e-46f7-b85e-20dea8750b6a" target="_blank" rel="noopener">Read source</a></div></div>
+
+    </div>
+
+    <div class="news-card" id="bulgaria">
+      <h3>Bulgaria <span class="ccy">EUR</span></h3>
+      <div class="quickstats">Inflation (Jun, prelim.) <b>5.6%</b> y/y · 2026 deficit (EC est.) <b>5.4% GDP</b> · Rating <b>A- (Scope)</b></div>
+
+      <div class="story" data-cat="political"><div class="headline">GERB, BSP-linked figures and businessman Hristoforos Amanatidis surfaced around new appointments at the state water-utility holding and the "Avtomagistrali" road company, per reporting on the appointees' backgrounds.</div><div class="meta">Капитал (Capital.bg) — 7 Jul 2026 · <a href="https://www.capital.bg/politika_i_ikonomika/ikonomika/2026/07/07/4932858_gerb_bsp_i_hristoforos_amanatidis_izpluvat_pokrai/" target="_blank" rel="noopener">Original (BG)</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">The European Commission expects Sofia to submit a concrete deficit-reduction plan by 15 October, after recommending on 25 June that Bulgaria enter the EU's Excessive Deficit Procedure; the 2026 deficit is estimated at 5.4% of GDP, easing toward 3.3% by 2028 as debt climbs to 35.2% of GDP.</div><div class="meta">Капитал (Capital.bg) — 3 Jul 2026 · <a href="https://www.capital.bg/politika_i_ikonomika/ikonomika/2026/07/03/4931229_bjudjet_2026_7_miliarda_problema/" target="_blank" rel="noopener">Original (BG)</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">Preliminary NSI data show inflation cooling to 5.6% y/y in June, down from near 7% in April and May — among the moderating factors was the drop in energy commodity prices following progress in US-Iran talks.</div><div class="meta">Капитал (Capital.bg) — 2 Jul 2026 · <a href="https://www.capital.bg/politika_i_ikonomika/sedmicata/2026/07/02/4930916_vajnite_novini_prez_sedmicata/" target="_blank" rel="noopener">Original (BG)</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">The OECD trimmed its 2026 Bulgaria growth forecast to 2.5%, citing high energy prices pushing inflation to an estimated 4.3% for the year, with the budget deficit seen staying elevated near 4.1% of GDP by 2027.</div><div class="meta">Капитал (Capital.bg) — 3 Jun 2026 · <a href="https://www.capital.bg/politika_i_ikonomika/ikonomika/2026/06/03/4921243_oisr_poniji_ochakvaniiata_si_za_rusta_v_bulgarskata/" target="_blank" rel="noopener">Original (BG)</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">An ECB blog review found the changeover had a "limited and largely one-off" effect on consumer prices, concentrated in services.</div><div class="meta">ECB Blog — 9 Apr 2026 · <a href="https://www.ecb.europa.eu/press/blog/date/2026/html/ecb.blog20260409~cc951a0d29.en.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">Headline inflation had eased from 3.5% in December 2025 to 2.1% by February 2026, before accelerating again through the spring on energy and food prices.</div><div class="meta">ECB Blog — 9 Apr 2026 · <a href="https://www.ecb.europa.eu/press/blog/date/2026/html/ecb.blog20260409~cc951a0d29.en.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fx"><div class="headline">Bulgaria officially adopted the euro on 1 January 2026, becoming the 21st member of the euro area.</div><div class="meta">Европейска централна банка (ECB) — 1 Jan 2026 · <a href="https://www.ecb.europa.eu/press/economic-bulletin/focus/2026/html/ecb.ebbox202508_01~b4379b735b.en.html" target="_blank" rel="noopener">English source</a> · <a href="https://www.ecb.europa.eu/press/pr/date/2026/html/ecb.pr260101~c830245e42.bg.html" target="_blank" rel="noopener">Original (BG)</a></div></div>
+
+      <div class="story" data-cat="political"><div class="headline">Anti-corruption protests toppled a conservative-led government in December 2025, pushing Bulgaria toward its eighth election in five years.</div><div class="meta">Al Jazeera — 1 Jan 2026 · <a href="https://www.aljazeera.com/economy/2026/1/1/bulgaria-adopts-euro-amid-celebration-and-anxiety-over-inflation" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">Food prices had risen 5% y/y in November 2025 — more than double the eurozone average — fueling public concern ahead of the changeover.</div><div class="meta">Euronews — 1 Jan 2026 · <a href="https://www.euronews.com/my-europe/2026/01/01/bulgaria-switches-to-the-euro-amid-mixed-reactions-from-its-citizens" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fx"><div class="headline">The Council of the EU fixed the lev conversion rate at 1.95583 per euro, the same rate used under the ERM II peg.</div><div class="meta">ECB Economic Bulletin — Jan 2026 · <a href="https://www.ecb.europa.eu/press/economic-bulletin/focus/2026/html/ecb.ebbox202508_01~b4379b735b.en.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="political"><div class="headline">About 70% of Bulgarian government debt was already euro-denominated before adoption, reflecting decades of deep euroisation under the currency board.</div><div class="meta">ECB Economic Bulletin — Jan 2026 · <a href="https://www.ecb.europa.eu/press/economic-bulletin/focus/2026/html/ecb.ebbox202508_01~b4379b735b.en.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fx"><div class="headline">Dual lev/euro price displays remain mandatory in shops through August 2026; the lev stayed exchangeable at banks until 31 January.</div><div class="meta">Al Jazeera — 31 Dec 2025 · <a href="https://www.aljazeera.com/economy/2025/12/31/bulgaria-set-to-adopt-the-euro-why-is-this-causing-controversy" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fx"><div class="headline">Scope Ratings upgraded Bulgaria to A- ahead of adoption, citing the credit-positive removal of currency-mismatch risk.</div><div class="meta">Scope Ratings — CEE Outlook 2026 · <a href="https://www.scoperatings.com/ScopeRatingsApi/api/downloadstudy?id=e5fa43de-2b4e-46f7-b85e-20dea8750b6a" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">The Bulgarian National Bank governor now sits as a full member of the ECB Governing Council, giving Bulgaria a direct say in euro-area rate policy.</div><div class="meta">European Central Bank · <a href="https://www.ecb.europa.eu/euro/changeover/bulgaria/html/index.en.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+    </div>
+
+    <div class="news-card" id="slovakia">
+      <h3>Slovakia <span class="ccy">EUR</span></h3>
+      <div class="quickstats">Inflation (May) <b>3.8%</b> y/y · GDP 2026f <b>0.8%</b> · Deficit 2026f <b>4.6% GDP</b></div>
+
+      <div class="story" data-cat="growth"><div class="headline">Unemployment reached nearly 3% in June, per the latest labour-market figures.</div><div class="meta">Index SME (sme.sk) — 7 Jul 2026 · <a href="https://www.sme.sk/index" target="_blank" rel="noopener">Original (SK)</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">May 2026 inflation eased to 3.8% y/y from 3.9% in April, still among the highest in the euro area.</div><div class="meta">Trading Economics — 14 May 2026 · <a href="https://tradingeconomics.com/slovakia/inflation-cpi" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="rates"><div class="headline">NBS Governor Peter Kažimír does not rule out a further rise in inflation as regulated energy prices are phased toward market levels.</div><div class="meta">Denník N — inflation desk · <a href="https://dennikn.sk/tema/inflacia/" target="_blank" rel="noopener">Original (SK)</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">March 2026 inflation had slowed to 3.5% from 3.7% in February — the slowest pace since December 2024 — helped by Easter food discounts, before Middle East-linked fuel costs pushed prices higher again later in the spring.</div><div class="meta">Denník N — inflation desk · <a href="https://dennikn.sk/tema/inflacia/" target="_blank" rel="noopener">Original (SK)</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">European Commission forecasts 2026 inflation at 4.3%, as the withdrawal of energy price ceilings offsets disinflation elsewhere.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-economies/slovakia/economic-forecast-slovakia_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">Real GDP growth is expected to stay subdued at 0.8% in 2026 before picking up to 1.5% in 2027.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-economies/slovakia/economic-forecast-slovakia_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">The public deficit narrowed to 4.5% of GDP in 2025 but is projected to widen again to 4.6% in 2026 and 5.4% in 2027.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-economies/slovakia/economic-forecast-slovakia_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">Debt-to-GDP is set to climb from 61.4% in 2025 to 63.7% in 2026 and 66.9% in 2027.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-economies/slovakia/economic-forecast-slovakia_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="fiscal"><div class="headline">OECD notes growth remains constrained by weak automotive production and fiscal consolidation, though EU funds continue supporting investment.</div><div class="meta">OECD Economic Snapshot · <a href="https://www.oecd.org/en/topics/sub-issues/economic-surveys/slovak-republic-economic-snapshot.html" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">The National Bank of Slovakia notes inflation remains among the highest in the euro area, driven by VAT hikes and consolidation measures.</div><div class="meta">Národná banka Slovenska (NBS) — native name, EN edition linked · <a href="https://nbs.sk/en/inflation/" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">A new automotive production factory is expected to launch, supporting an export rebound from 2027.</div><div class="meta">European Commission — Spring 2026 Forecast · <a href="https://economy-finance.ec.europa.eu/economic-surveillance-eu-economies/slovakia/economic-forecast-slovakia_en" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="inflation"><div class="headline">Core inflation (excluding regulated prices) eased slightly to 2.3% in May 2026 from 2.4% in April.</div><div class="meta">Trading Economics — 14 May 2026 · <a href="https://tradingeconomics.com/slovakia/inflation-cpi" target="_blank" rel="noopener">Read source</a></div></div>
+
+      <div class="story" data-cat="growth"><div class="headline">GDP per capita reached an estimated $31,242 in 2026, up 9.6% from $28,498 in 2025.</div><div class="meta">Worldometer (IMF data) — Apr 2026 · <a href="https://www.worldometers.info/gdp/slovakia-gdp/" target="_blank" rel="noopener">Read source</a></div></div>
+
+    </div>
+
+  </div>
+
+  <div class="section-title">Regional themes</div>
+  <div class="themes">
+
+    <div class="story">
+      <div class="headline"><strong>Monetary policy split:</strong> Czechia hiked in June, Hungary cut in June, Poland and Romania are on hold this week — a rare divergence in direction across the region worth tracking meeting to meeting.</div>
+      <div class="meta">FXStreet (Erste Group) — 6 Jul 2026 · <a href="https://www.fxstreet.com/analysis/cee-stability-of-rates-in-poland-romania-and-serbia-202607060606" target="_blank" rel="noopener">Read source</a></div>
+    </div>
+
+    <div class="story">
+      <div class="headline"><strong>Fiscal slippage in HU and RO:</strong> Hungary's PM flagged a 2026 deficit likely above 7% of GDP; Romania's deficit target sits at 8.4% of GDP with consolidation efforts ongoing.</div>
+      <div class="meta">FXStreet / European Commission · <a href="https://www.fxstreet.com/analysis/cee-stability-of-rates-in-poland-romania-and-serbia-202607060606" target="_blank" rel="noopener">Read source</a></div>
+    </div>
+
+    <div class="story">
+      <div class="headline"><strong>EU fund absorption as a swing factor:</strong> Hungary's €16bn unlock and Romania's six pending laws both hinge on EU fund access, with real implications for FX and investment this year.</div>
+      <div class="meta">FocusEconomics / FXStreet · <a href="https://www.focus-economics.com/countries/hungary/" target="_blank" rel="noopener">Read source</a></div>
+    </div>
+
+    <div class="story">
+      <div class="headline"><strong>Eurozone enlargement:</strong> Bulgaria joined the euro area on 1 January 2026, leaving Czechia, Hungary, Poland and Romania as the region's remaining non-euro EU states.</div>
+      <div class="meta">European Central Bank · <a href="https://www.ecb.europa.eu/press/economic-bulletin/focus/2026/html/ecb.ebbox202508_01~b4379b735b.en.html" target="_blank" rel="noopener">Read source</a></div>
+    </div>
+
+    <div class="story">
+      <div class="headline"><strong>Global growth headwind:</strong> World Bank projects 2026 global growth slowing to 2.5%, the weakest since the pandemic, a drag on export-oriented CEE economies including Slovakia's auto sector.</div>
+      <div class="meta">FXStreet — World Bank forecasts · <a href="https://www.fxstreet.com/analysis/cee-world-bank-updates-their-economic-forecasts-202606170533" target="_blank" rel="noopener">Read source</a></div>
+    </div>
+
+    <div class="story">
+      <div class="headline"><strong>CEE real estate investment rebound:</strong> Regional investment volumes reached €11.3bn in 2025, up 34% y/y, with Czechia acting as the region's "liquidity anchor."</div>
+      <div class="meta">Eurobuild CEE (Knight Frank data) · <a href="https://eurobuildcee.com/en/news/36183-cee-ready-for-the-rebound" target="_blank" rel="noopener">Read source</a></div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  <p>To refresh: message Claude "refresh my CEE dashboard." Paste the updated HTML into this file on GitHub (pencil icon → paste → Commit changes).</p>
+  <p>All headlines are translated/summarized into English. Where the underlying source is a national institution or press agency (ČNB, MNB, PAP, BNR, ECB in Bulgarian), an "Original" link in its native language sits alongside the English source. International-only publishers (IMF, OECD, European Commission, Trading Economics, FXStreet, Scope Ratings, Eurobuild CEE, etc.) publish primarily in English, so only one link is shown for those.</p>
+</footer>
+
+<script>
+(function(){
+  var buttons = document.querySelectorAll('.filter-btn');
+  var stories = document.querySelectorAll('.story[data-cat]');
+
+  buttons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      buttons.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var filter = btn.getAttribute('data-filter');
+
+      stories.forEach(function(story){
+        if(filter === 'all' || story.getAttribute('data-cat') === filter){
+          story.classList.remove('hidden');
+        } else {
+          story.classList.add('hidden');
+        }
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
