@@ -1,0 +1,49 @@
+name: Daily CEE dashboard refresh
+
+# Runs every day, and can also be triggered by hand from the Actions tab.
+on:
+  schedule:
+    # 06:15 UTC daily. GitHub cron is UTC; adjust if you want a different local time.
+    # (Scheduled runs can be delayed by a few minutes to ~an hour when GitHub is busy.)
+    - cron: "15 6 * * *"
+  workflow_dispatch: {}   # the "Run workflow" button
+
+# Let the job push the regenerated file back into the repo.
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Ask Claude to refresh the dashboard
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/refresh_dashboard.py
+
+      - name: Commit and push if the dashboard changed
+        run: |
+          git config user.name  "cee-dashboard-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if git diff --quiet -- index.html; then
+            echo "No changes to index.html — nothing to commit."
+          else
+            git add index.html
+            git commit -m "Daily refresh: $(date -u +'%Y-%m-%d')"
+            git push
+          fi
