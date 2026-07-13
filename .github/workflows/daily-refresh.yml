@@ -1,11 +1,12 @@
 name: Daily CEE dashboard refresh
 
-# Runs every day, and can also be triggered by hand from the Actions tab.
+# Schedule disabled — only runs when triggered by hand from the Actions tab.
+# To re-enable the daily cron, uncomment the schedule block below.
 on:
-  schedule:
-    # 06:15 UTC daily. GitHub cron is UTC; adjust if you want a different local time.
-    # (Scheduled runs can be delayed by a few minutes to ~an hour when GitHub is busy.)
-    - cron: "15 6 * * *"
+  # schedule:
+  #   # 06:15 UTC daily. GitHub cron is UTC; adjust if you want a different local time.
+  #   # (Scheduled runs can be delayed by a few minutes to ~an hour when GitHub is busy.)
+  #   - cron: "15 6 * * *"
   workflow_dispatch: {}   # the "Run workflow" button
 
 # Let the job push the regenerated file back into the repo.
